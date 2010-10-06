@@ -98,8 +98,8 @@ if __name__ == "__main__":
        print sys.argv[0] + " <input csv file>([[mac,rss,noise,encrypt,desc,lat,lon]])"
        sys.exit(1)
 
-    rawdat = np.array([ rec for rec in rawdat ])
-    #coords = np.array([ rec for rec in rawdat ])[:,11:13].astype(float)
+    rawdat = np.array(rawdat)
+    #coords = np.array(rawdat)[:,11:13].astype(float)
     pp.pprint(rawdat)
 
     cidrecs = {}
