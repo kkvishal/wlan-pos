@@ -98,10 +98,6 @@ def genKML_FPP(csvfile, kmlfile):
         print "%s is NOT a file!" % (csvfile)
         sys.exit(99)
         
-    if not os.path.isfile(kmlfile):
-        print "%s is NOT a file!" % (kmlfile)
-        sys.exit(99)
-
     rawdat = csv.reader( open(csvfile,'r') )
 
     #icon_href = 'http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png'
@@ -195,14 +191,19 @@ if __name__ == "__main__":
     #for type in icon_types:
     #    icon_types[type][1] = os.getcwd() + icon_types[type][1]
 
-    try:
-       csvfile = sys.argv[1]
-    except:
-       print sys.argv[0] + " <csv file>"
-       sys.exit(1)
+    arglen = len(sys.argv)
+    if (not arglen==2) and (not arglen==3):
+        print sys.argv[0] + " <csv file> [label]"
+        sys.exit(1)
+    else:
+        csvfile = sys.argv[1]
+        if arglen == 3:
+            label = sys.argv[2]
+        else:
+            label = 'cmri'
 
     pp = pprint.PrettyPrinter(indent=2)
 
-    kmlpath = 'kml'; label = 'neusoft'
+    kmlpath = 'kml'
     kmlfile = '%s/radiomap_%s.kml' % (kmlpath, label)
     genKML_FPP(csvfile, kmlfile)
