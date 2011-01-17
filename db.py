@@ -13,8 +13,8 @@ from config import dbsvrs, tbl_names, tbl_field, tbl_forms, tbl_idx, tbl_files, 
 
 
 class WppDB(object):
-    def __init__(self,dsn=None,tbl_names=tbl_names,tbl_field=None,tbl_forms=None,sqls=None,
-            tbl_files=None,tbl_idx=None,dbtype=None):
+    def __init__(self,dsn=None,tbl_names=None,tbl_field=None,tbl_forms=None,
+            sqls=None,tbl_files=None,tbl_idx=None,dbtype=None):
         if not dsn: sys.exit('Need DSN info!')
         if not dbtype: sys.exit('Need DB type!') 
         self.dbtype = dbtype
@@ -51,10 +51,11 @@ class WppDB(object):
         self.con.close()
 
     def getCIDcount(self, macs=None):
+        # FIXME: use table_name or table_inst for wpp_clusteridaps.
         if not macs: sys.exit('Need macs!')
         strWhere = "%s%s%s" % ("keyaps='", "' or keyaps='".join(macs), "'")
-        sql = self.sqls['SQL_SELECT'] % ("clusterid, count(clusterid) cmask", 
-                "wpp_clusteridaps where (%s) group by clusterid order by cmask desc"%strWhere)
+        sql = self.sqls['SQL_SELECT'] % ("clusterid, count(clusterid) ccnt", 
+            "wpp_clusteridaps where (%s) group by clusterid order by ccnt desc"%strWhere)
         print sql
         self.cur.execute(sql)
         return self.cur.fetchall()
@@ -99,7 +100,8 @@ class WppDB(object):
                     self.cur.execute(sql_drop_idx)
                     print sql_drop_idx
                     # create indexs.
-                    sql_make_idx = self.sqls['SQL_CREATEIDX'] % (idx_name,table_inst,col_name)
+                    sql_make_idx = self.sqls['SQL_CREATEIDX'] % \
+                                            (idx_name,table_inst,col_name)
                     self.cur.execute(sql_make_idx)
                     print sql_make_idx
             print '-'*40
@@ -168,6 +170,10 @@ class WppDB(object):
         self._insertMany(table_inst=table_inst, indat=cidfps)
 
     def getCIDcntMaxSeq(self, macs=None):
+        """
+        Get the count of certain cluster according to the input key macs, 
+        and the maximal seq number of this cluster.
+        """
         table_name = 'wpp_clusteridaps'
         table_inst = self.tbl_names[table_name]
         table_field = self.tbl_field[table_name]
@@ -181,13 +187,15 @@ class WppDB(object):
             sql1 = self.sqls['SQL_SELECT'] % \
                 ("clusterid cid, count(clusterid) cidcnt", 
                  "%s where (%s) group by clusterid order by cidcnt desc) a, %s t \
-                 where (a.cid=t.clusterid and a.cidcnt=%s) group by a.cid,a.cidcnt order by cidcnt desc" % \
+                 where (a.cid=t.clusterid and a.cidcnt=%s) \
+                 group by a.cid,a.cidcnt order by cidcnt desc" % \
                 (table_inst, strWhere, table_inst))
         elif self.dbtype == 'postgresql':
             sql1 = self.sqls['SQL_SELECT'] % \
                 ("clusterid as cid, count(clusterid) as cidcnt", 
                  "%s where (%s) group by clusterid order by cidcnt desc) a, %s t \
-                 where (cid=clusterid and cidcnt=%s) group by cid,cidcnt order by cidcnt desc" % \
+                 where (cid=clusterid and cidcnt=%s) \
+                 group by cid,cidcnt order by cidcnt desc" % \
                 (table_inst, strWhere, table_inst, num_macs))
         else: sys.exit('\nERROR: Unsupported DB type: %s!' % self.dbtype)
         sql = self.sqls['SQL_SELECT'] % ("cid,cidcnt,max(t.seq)", "(%s"%sql1)
