@@ -1,4 +1,5 @@
 syntax: glob
+nohup.out
 db_vance.txt
 tbl/tsttbl.tbl
 tool/orain.dat

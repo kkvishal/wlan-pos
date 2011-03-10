@@ -24,9 +24,9 @@ start_gunic() {
     LOGFILE=log/gunicorn_$datetime.log
     cd $PATH_WPPWSGI
     touch $LOGFILE
-    gunicorn -b :18080 -w $nworkers $APPMODULE --log-file $LOGFILE -p $PIDFILE
-    #gunicorn -b :18080 -w $nworkers -k $WORKER_CLASS_MEINHELD $APPMODULE --log-file $LOGFILE -p $PIDFILE
-    #gunicorn -b :18080 -w $nworkers -k $WORKER_CLASS_GEVENT $APPMODULE --log-file $LOGFILE -p $PIDFILE
+    nohup gunicorn -b :18080 -w $nworkers $APPMODULE --log-file $LOGFILE -p $PIDFILE &
+    #nohup gunicorn -b :18080 -w $nworkers -k $WORKER_CLASS_MEINHELD $APPMODULE --log-file $LOGFILE -p $PIDFILE &
+    #nohup gunicorn -b :18080 -w $nworkers -k $WORKER_CLASS_GEVENT $APPMODULE --log-file $LOGFILE -p $PIDFILE &
 }
 
 count_workers(){
