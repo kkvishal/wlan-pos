@@ -7,8 +7,7 @@ import socket as sckt
 import numpy as np
 import pprint as pp
 import simplejson as json
-sys.path.append('/home/alexy/dev/src/wlan-pos/')
-from config import termtxtcolors as colors
+from wpp.config import termtxtcolors as colors
  
 
 def makeReq(wlans=None, cells=None, atoken=None):
