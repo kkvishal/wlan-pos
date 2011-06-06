@@ -100,7 +100,7 @@ def doClusterIncr(fd_csv=None, wppdb=None, verb=True):
     # Support multi DB incr-clustering.
     dbips = DB_OFFLINE
     n_inserts = { 'n_newcids':0, 'n_newfps':0 }
-	if verb: widgets = ['Incr-Clustering: ',Percentage(),' ',Bar(marker=RotatingMarker())]
+    if verb: widgets = ['Incr-Clustering: ',Percentage(),' ',Bar(marker=RotatingMarker())]
     for svrip in dbips:
         dbsvr = dbsvrs[svrip]
         #print '%s %s %s' % ('='*15, svrip, '='*15)
