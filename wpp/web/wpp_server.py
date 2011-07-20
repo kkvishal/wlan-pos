@@ -144,11 +144,12 @@ def wpp_handler(environ, start_response):
             xmlnodes = xmlparser(datin).getchildren()
             macs = [ node.attrib['val'].split('|') for node in xmlnodes if node.tag == 'WLANIdentifier' ][0]
             rsss = [ node.attrib['val'].split('|') for node in xmlnodes if node.tag == 'WLANMatcher' ][0]
-            # fix postion.
-            INTERSET = min(CLUSTERKEYSIZE, len(macs))
-            idxs_max = argsort(rsss)[:INTERSET]
-            mr = vstack((macs, rsss))[:,idxs_max]
-            loc = fixPos(INTERSET, mr); #loc = [] # test google location
+            if macs and rsss:
+                INTERSET = min(CLUSTERKEYSIZE, len(macs))
+                idxs_max = argsort(rsss)[:INTERSET]
+                mr = vstack((macs, rsss))[:,idxs_max]
+                loc = fixPos(INTERSET, mr)
+            else: loc = []
             errinfo='OK'; errcode='100'
             if loc: lat, lon, ee = loc
             else:
