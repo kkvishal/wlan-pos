@@ -156,7 +156,7 @@ def wpp_handler(environ, start_response):
             else:
                 cell = [ node.attrib for node in xmlnodes if node.tag == 'CellInfo' ]
                 if cell: 
-                    loc_google = googleLocation(macs=macs, rsss=rsss, cell[0]) 
+                    loc_google = googleLocation(macs=macs, rsss=rsss, cellinfo=cell[0]) 
                     if loc_google: lat, lon, ee = loc_google
                     else: lat = 39.9055; lon = 116.3914; ee = 1000; errinfo = 'AccuTooBad'; errcode = '102' 
                 else: lat = 39.9055; lon = 116.3914; ee = 1000; errinfo = 'AccuTooBad'; errcode = '102'
