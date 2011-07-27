@@ -16,6 +16,8 @@ POS_RESP="""<?xml version="1.0" encoding="UTF-8"?>
         <Result ErrCode="%s" ErrDesc="%s"/>
         <Coord lat="%.6f" lon="%.6f" h="0.0"/>
         <ErrRange val="%.2f"/>
+        <PosLevel val="%s" />
+        <Area code="%s" addr="%s"/>
 </PosRes>"""
 XHTML_IMT = "application/xhtml+xml"
 

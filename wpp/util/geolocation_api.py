@@ -87,6 +87,7 @@ def genLocReq(macs=None, rsss=None, cellinfo={}, atoken=None):
 
 def connect_retry(f):
     def wrapper(*arg, **ka):
+        delay = 1
         while True:
             try:
                 result = f(*arg, **ka)
@@ -99,11 +100,11 @@ def connect_retry(f):
                 else: print e
             except Exception, e:
                 print e
-            print colors['blue'] % '... Retrying ...'
             #if isinstance(retry, int):
             #    if retry <= 0: break
             #    else: retry -= 1
-            time.sleep(1)
+            delay += 0.5; time.sleep(delay)
+            print colors['blue'] % '... Retrying ...'
         return result
     return wrapper
 
@@ -155,8 +156,14 @@ def collectCellArea():
             geodata = googleGeocoding(latlon)
             if geodata['status'] == u'OK':
                 query_cnt += 1; print 'query count: %s' % query_cnt
-                area_names = [ x['address_components'][::-1][1:]
-                        for x in geodata['results'] if x['types'][0]=='sublocality' ][0]
+                area_names = [ x['address_components'][::-1][1:] 
+                        for x in geodata['results'] if x['types'][0]=='sublocality' ]
+                if area_names: area_names = area_names[0]
+                else:
+                    area_names = [ x['address_components'][::-1][:-1] 
+                            for x in geodata['results'] if x['types'][0]=='street_address' ]
+                    if area_names: area_names = area_names[0]
+                    else: continue
                 area_name = [ x['long_name'] for x in area_names ]
                 area_district = area_name[-1]
                 if not area_district in area_codes: 
@@ -205,6 +212,44 @@ area_codes = {
         "Beitang": "320204",
        "Chong'an": "320202",
        "Nanchang": "320203",
+          "Anxin": "130632",
+     "Gaobeidian": "130684",
+       "Zhuozhou": "130681",
+       "Dingxing": "130626",
+      "Rongcheng": "130629",
+         "Xushui": "130625",
+         "Jixian": "120225",
+       "Dongling": "210112",
+          "Daoli": "230102",
+       "Jinjiang": "350582",
+       "Changtai": "350625",
+       "Kongtong": "620802",
+           "Jimo": "370282",
+         "Shibei": "370203",
+         "Sifang": "370205",
+          "Yanta": "610113",
+        "Chiping": "371523",
+       "Qingyang": "510105",
+      "Pingjiang": "430626",
+         "Jiyuan": "419001",
+         "Tianhe": "440106",
+       "Bao'anqu": "440306",
+         "Xishan": "320205",
+        "Fucheng": "510703",
+        "Youxian": "510704",
+         "Hal'an": "320621",
+          "Laixi": "370285",
+         "Nanhai": "440605",
+           "Anji": "330523",
+       "Jiangbei": "330205",
+         "Doumen": "440403",
+      "Jiangning": "320115",
+       "Jiangyan": "321284",
+      "Shouguang": "370783",
+         "Tinghu": "320902",
+         "Lianhu": "610104",
+          "Qixia": "320113",
+      "Tai Ha St": "810000",
           "Binhu": "320211", }
 
 if __name__ == "__main__":
