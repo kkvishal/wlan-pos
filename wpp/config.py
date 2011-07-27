@@ -10,12 +10,27 @@ KNN = 4
 KWIN = 1.25
 RADIUS = 6372797 #meter
 
-POS_RESP="""<?xml version="1.0" encoding="UTF-8"?>
+POS_RESP_FULL="""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE PosRes SYSTEM "PosRes.dtd">
 <PosRes>
         <Result ErrCode="%s" ErrDesc="%s"/>
         <Coord lat="%s" lon="%s" h="0.0"/>
         <ErrRange val="%s"/>
+        <PosLevel val="%s" />
+        <Area code="%s" addr="%s"/>
+</PosRes>"""
+POS_RESP_PT="""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE PosRes SYSTEM "PosRes.dtd">
+<PosRes>
+        <Result ErrCode="%s" ErrDesc="%s"/>
+        <Coord lat="%s" lon="%s" h="0.0"/>
+        <ErrRange val="%s"/>
+        <PosLevel val="%s" />
+</PosRes>"""
+POS_RESP_AREA="""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE PosRes SYSTEM "PosRes.dtd">
+<PosRes>
+        <Result ErrCode="%s" ErrDesc="%s"/>
         <PosLevel val="%s" />
         <Area code="%s" addr="%s"/>
 </PosRes>"""

@@ -13,7 +13,7 @@ except ImportError:
 import logging
 wpplog = logging.getLogger('wpp')
 from wpp.db import WppDB
-from wpp.config import dbsvrs, KNN, CLUSTERKEYSIZE, KWIN, DB_ONLINE, POS_RESP
+from wpp.config import dbsvrs, KNN, CLUSTERKEYSIZE, KWIN, DB_ONLINE, POS_RESP_FULL, POS_RESP_AREA, POS_RESP_PT
 from wpp.util.geo import dist_km
 from wpp.util.geolocation_api import googleLocation
 from wpp.offline import doClusterIncr
@@ -145,7 +145,9 @@ def fixPos(posreq=None, has_google=False):
                     wpplog.info('Added 1 Cell FP from Google')
             else: wpplog.error('Google location FAILED!')
     wppdb.close()
-    posresp= POS_RESP % (errcode, errinfo, lat, lon, ee, plevel, acode, addr)
+    if plevel == 'Hybrid': posresp = POS_RESP_FULL % (errcode, errinfo, lat, lon, ee, plevel, acode, addr)
+    elif plevel == 'Area': posresp = POS_RESP_AREA % (errcode, errinfo, plevel, acode, addr)
+    else: posresp = POS_RESP_PT % (errcode, errinfo, lat, lon, ee, plevel)
     return posresp
 
 
