@@ -234,7 +234,7 @@ tbl_forms = { 'oracle':{
                 'wpp_cellarea':""" (
                         laccid VARCHAR(30) NOT NULL,
                       areacode VARCHAR(10) NOT NULL,
-                      areaname VARCHAR(30) NOT NULL)""",
+                      areaname VARCHAR(50) NOT NULL)""",
                 'wpp_celloc':""" (
                         laccid VARCHAR(30) NOT NULL,
                            lat NUMERIC(9,6) NOT NULL DEFAULT 0,

@@ -85,31 +85,32 @@ def genLocReq(macs=None, rsss=None, cellinfo={}, atoken=None):
     return req_json
 
 
-def connect_retry(f):
-    def wrapper(*arg, **ka):
-        delay = 1
-        while True:
-            try:
-                result = f(*arg, **ka)
-                break
-            except (sckt.error, ul.URLError), e:
-                if hasattr(e, 'code'):
-                    print(colors['red'] % ('HTTP Error: (%s): %s' % (e.code, e.msg)))
-                elif hasattr(e, 'reason'):
-                    print(colors['red'] % ('URL Error: %s!' % e.reason))
-                else: print e
-            except Exception, e:
-                print e
-            #if isinstance(retry, int):
-            #    if retry <= 0: break
-            #    else: retry -= 1
-            delay += 0.5; time.sleep(delay)
-            print colors['blue'] % '... Retrying ...'
-        return result
-    return wrapper
+def connect_retry(**ka):
+    """ try 10 times at most. """
+    def decorator(f, **kb):
+        def wrapper(*args, **kc):
+            delay = 1; result = None
+            if 'try_times' in ka and type(ka['try_times']) is int: try_times = ka['try_times']
+            else: try_times = 5
+            for i in xrange(try_times):
+                try:
+                    result = f(*args, **kc)
+                    break
+                except (sckt.error, ul.URLError), e:
+                    if hasattr(e, 'code'):
+                        print(colors['red'] % ('HTTP Error: (%s): %s' % (e.code, e.msg)))
+                    elif hasattr(e, 'reason'):
+                        print(colors['red'] % ('URL Error: %s!' % e.reason))
+                    else: print e
+                except Exception, e: print e
+                delay += 0.5; time.sleep(delay)
+                print colors['blue'] % '... Retrying ...'
+            return result
+        return wrapper
+    return decorator
 
-@connect_retry
-def googleLocation(macs=None, rsss=None, cellinfo=None):
+@connect_retry(try_times=3)
+def googleLocation(macs=[], rsss=[], cellinfo=None):
     req_content = genLocReq(macs=macs, rsss=rsss, cellinfo=cellinfo)
     req_url = "http://www.google.com/loc/json"
     sckt.setdefaulttimeout(3)#; setProxy()
@@ -130,7 +131,7 @@ def setProxy():
     ul.install_opener( opener )
 
 
-@connect_retry
+@connect_retry()
 def googleGeocoding(latlon=(0,0), format='json', sensor='false'):
     """return reverse geocoding result of google api."""
     googleurl = 'http://maps.google.com/maps/api/geocode'
@@ -154,29 +155,32 @@ def collectCellArea():
         if not areacodes:
             latlon = (lat, lon)
             geodata = googleGeocoding(latlon)
-            if geodata['status'] == u'OK':
-                query_cnt += 1; print 'query count: %s' % query_cnt
-                area_names = [ x['address_components'][::-1][1:] 
-                        for x in geodata['results'] if x['types'][0]=='sublocality' ]
-                if area_names: area_names = area_names[0]
-                else:
-                    area_names = [ x['address_components'][::-1][:-1] 
-                            for x in geodata['results'] if x['types'][0]=='street_address' ]
+            if type(geodata) is dict and 'status' in geodata:
+                if geodata['status'] == u'OK':
+                    query_cnt += 1; print 'query count: %s' % query_cnt
+                    # filter out sublocality field.
+                    area_names = [ x['address_components'][::-1][1:] 
+                            for x in geodata['results'] if x['types'][0]=='sublocality' ]
                     if area_names: area_names = area_names[0]
-                    else: continue
-                area_name = [ x['long_name'] for x in area_names ]
-                area_district = area_name[-1]
-                if not area_district in area_codes: 
-                    print 'district: %s not in area_codes!' % area_district
-                    pp.pprint(geodata['results']); sys.exit(0)
-                area_code = area_codes[area_district]
-                if area_code in [x[0] for x in areacodes]: continue
-                area_name = '+'.join(area_name)
-                rec = '"%s","%s","%s","%s"' % (cid, area_code, area_name, lac)
-                cur.execute('INSERT INTO cell_area VALUES (%s)' % rec)
-                conn.commit()
-                print colors['blue'] % ('insert %s' % rec)
-            else: sys.exit(colors['red'] % ('ERROR: %s !!!' % geodata['status']))
+                    else: # if no sublocality presented, then filter out street_address field.
+                        area_names = [ x['address_components'][::-1][:-2] 
+                                for x in geodata['results'] if x['types'][0]=='street_address' ]
+                        if area_names: area_names = area_names[0]
+                        else: continue
+                    area_name = [ x['long_name'] for x in area_names if not x['long_name'].isdigit() ]
+                    area_district = area_name[-1]
+                    if not area_district in area_codes: 
+                        print 'district: %s not in area_codes!' % area_district
+                        pp.pprint(geodata['results']); sys.exit(0)
+                    area_code = area_codes[area_district]
+                    if area_code in [x[0] for x in areacodes]: continue
+                    area_name = '+'.join(area_name)
+                    rec = '"%s","%s","%s","%s"' % (cid, area_code, area_name, lac)
+                    cur.execute('INSERT INTO cell_area VALUES (%s)' % rec)
+                    conn.commit()
+                    print colors['blue'] % ('insert %s' % rec)
+                else: sys.exit(colors['red'] % ('ERROR: %s !!!' % geodata['status']))
+            else: print colors['red'] % 'ERROR: Geocoding Failed !!!'; continue
         else: continue
         cur.execute('select count(*) from cell_area')
         print 'Count: %s\n%s' % (cur.fetchone()[0], '-'*40)
@@ -245,12 +249,113 @@ area_codes = {
          "Doumen": "440403",
       "Jiangning": "320115",
        "Jiangyan": "321284",
+         "Shishi": "350581",
+        "Shifang": "510682",
+          "Jinxi": "361027",
+        "Jiading": "310114",
+   "Huangshigang": "420202",
+         "Qingpu": "310118",
+       "Dangyang": "420582",
+     "Tianbao Rd": "441900",
+     "Jiangchuan": "530421",
+        "Qinhuai": "320104",
       "Shouguang": "370783",
+       "Shahekou": "210204",
+      "Shuimogou": "650105",
+          "Pukou": "320111",
          "Tinghu": "320902",
          "Lianhu": "610104",
           "Qixia": "320113",
       "Tai Ha St": "810000",
+        "Sha Tin": "810000",
+     "Pak Tak St": "810000",
+         "Jinnan": "120112",
+        "Jinshui": "410105",
+          "Panyu": "440113",
+         "Heping": "210102",
+        "Wucheng": "330702",
+        "Jing'an": "310106",
+     "Tin Wah Rd": "810000",
+       "Shiji Rd": "210100",
+ "Hunnan West Rd": "210100",
+    "Shenying Rd": "210100",
+     "Xinlong St": "210100",
+       "Gaoge Rd": "210100",
+       "Gaoke Rd": "210100",
+"Changbai East Rd": "210100",
+"Changbai West Rd": "210100",
+      "Minzhu Rd": "210100",
+      "Nansan Rd": "210100",
+    "Tongze S St": "210100",
+   "Tianjin S St": "210100",
+     "Nansima Rd": "210100",
+   "Nanning S St": "210100",
+     "River N St": "210100",
+      "Yuping Rd": "210100",
+     "Nanyima Rd": "210100",
+    "Heping S St": "210100",
+    "Zhonghua Rd": "210100",
+       "Shenyang": "210100",
          "Haizhu": "440105",
+        "Gucheng": "530702",
+      "Songjiang": "310117",
+        "Minhang": "310112",
+        "Wanzhou": "500101",
+         "Futian": "440304",
+       "Xingning": "441481",
+        "Weiyang": "610112",
+       "Lingling": "431102",
+    "Lengshuitan": "431103",
+       "Baiyunqu": "440111",
+          "Liwan": "440103",
+         "Shunde": "440606",
+      "Anningshi": "530181",
+          "Yubei": "500112",
+         "Anyang": "410500",
+        "Hanshan": "341423",
+        "Lanshan": "371302",
+        "Tianxin": "430103",
+          "Putuo": "310107",
+          "Huadu": "440114",
+         "Haishu": "330203",
+         "Shinan": "370202",
+         "Zhabei": "310108",
+          "Guide": "632523",
+        "Xianyou": "350322",
+        "Hongkou": "310109",
+        "Dongtai": "320981",
+        "Laizhou": "370683",
+         "Yangpu": "310110",
+        "Jindong": "330703",
+       "Pengshui": "500243",
+      "Yongchuan": "500118",
+        "Wuzhong": "320506",
+       "Beilinqu": "610103",
+    "Hami(Kumul)": "652201",
+      "Jiangdong": "330204",
+       "Huangdao": "370211",
+           "Daye": "420281",
+           "Wudi": "371623",
+          "Feixi": "340123",
+          "Lixia": "370102",
+         "Liandu": "331102",
+         "Linwei": "610502",
+         "Qiaoxi": "130104",
+        "Xinzhou": "420117",
+        "Dinghai": "330902",
+        "Changji": "652301",
+        "Yingkou": "210800",
+      "Shuangliu": "510122",
+      "Shayibake": "650103",
+       "Fengyang": "341126",
+    "Xixiangtang": "450107",
+          "Taihe": "360826",
+          "Wujin": "320412",
+     "Jiangcheng": "530826",
+ "Jiangzhou Unit": "451402",
+         "Hui'an": "350521",
+   "Pudong Xinqu": "310115",
+   "Binhai Xinqu": "120116",
           "Binhu": "320211", }
 
 if __name__ == "__main__":
