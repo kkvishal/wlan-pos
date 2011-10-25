@@ -117,9 +117,10 @@ if __name__ == "__main__":
 
     target = targets['wpp_local']
     #target['urlpath'] = target['urlpath'].lower() # compatible with local fpp urlpath.
-    # urlpath & port for nginx reverse proxy testing.
-    #target['ip'] = '218.206.179.209'
-    #target['port'] = '80'
+    # urlpath & port for cmcc mobile naviwap test.
+    #target['ip'] = '211.137.35.180'
+    #target['port'] = '9999'
+    #target['urlpath'] = 'naviwap/MELocationAction.do'
     #target['req_data'] = req_uprecs
     url = 'http://%s:%s/%s' % (target['ip'], target['port'], target['urlpath'])
     print '\nRequesting %s from %s\n' % (url, ip_src)
@@ -133,6 +134,9 @@ if __name__ == "__main__":
     # need compression.
     #req.add_header("Content-Type", "application/zip")
     req.add_header("User-Agent", "WPP web service request simulator")
+    # header for cmcc naviwap bug test.
+    #req.add_header("User-Agent", "UCWEB")
+    #req.add_header("x-up-calling-line-id", "13488793935")
     resp = urllib2.urlopen(req)
     print '-'*40
     print 'Response:'
