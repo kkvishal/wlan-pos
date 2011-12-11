@@ -270,7 +270,7 @@ def fixPosWLAN(len_wlan=None, wlan=None, wppdb=None, verb=False):
         N_fp = len(keycfps)
         if N_fp == 1: 
             if maxNI == 1: poserr = 200
-            else: poserr = 100
+            else: poserr = 150
         else:
             if verb: 
                 wpplog.debug('all_pos_lenrss: %s' % all_pos_lenrss)

@@ -271,3 +271,6 @@
 2011-09-07
     1) Fix 'Time' attrib val interpretation in PosReq xmlnodes for location.fixPos()
     2) Mod Error limit up to 8000 in util.geolocation_api.googleLocation
+2011-12-09
+    1) Fix to add area_try by 1 whenever the google area location was ok or not in offline module.
+    2) Fix WLAN FP location for new office building.

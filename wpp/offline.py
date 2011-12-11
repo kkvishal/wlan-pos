@@ -261,6 +261,8 @@ def crawlAreaLocData():
                 print fp
                 # try google area location.
                 geoaddr = googleAreaLocation( latlon=(fp[11], fp[12]) )
+                # area_try += 1 & quit
+                wppdb.setUprecAreaTry(area_try=fp[18]+1, time=time)
                 if geoaddr:
                     # insert area location info(laccid~geoaddr) into |wpp_cellarea|.
                     # till now, area_location: 'laccid,area_code,province>city>district'.
@@ -276,8 +278,6 @@ def crawlAreaLocData():
                 else:
                     if geoaddr is None: sys.exit(0)  # OVER_QUERY_LIMIT.
                     else: pass
-                # area_try += 1 & quit
-                wppdb.setUprecAreaTry(area_try=fp[18]+1, time=time)
         #if fail_history:
         #    print fail_history
 
