@@ -24,7 +24,7 @@
                         #author{
                                 padding:10px 0px;
                                 font-size: 14px;
-                                width:520px;
+                                width:550px;
                                 text-align: left;
                         }
                         #content{
@@ -80,9 +80,11 @@
                 </script>
         </head>
         <h1>ChatBox</h1>
-        <div id="author">version 0.1beta</div>
+        <div id="author">version 0.1beta (supports all NON-IE browsers: firefox/chrome/safari/opera)</div>
         <input id="input" type="text" size="80" />
         <input id="send"  type="button" value="Send message" />
+        <br>
+        <br>
         
         <div id="content">
                 {% for msg in messages|reverse %}
