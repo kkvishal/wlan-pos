@@ -222,10 +222,10 @@ if __name__ == "__main__":
     print
     print '%-18s %3s %5s %-4s %-6s' % ('MAC (BSSID)', 'RSS', 'Noise', 'Key', 'ESSID')
     print '-' * 50
-    wlan = dict([ (ap[1], ap) for ap in wlan ])
+    wlan = [ (ap[1], ap) for ap in wlan ]
     sorted_rss = sorted(wlan)
-    for rss in sorted_rss:
-        mac, rss, noise, key, essid = wlan[rss]
+    for rss, ap in sorted_rss:
+        mac, rss, noise, key, essid = ap
         enc = cd.detect(essid)['encoding']
         if not enc is None:
             essid = essid.decode(enc)
